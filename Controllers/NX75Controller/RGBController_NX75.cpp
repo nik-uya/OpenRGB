@@ -1,43 +1,36 @@
-#include "RGBController.h"
-#include "NX75Controller.h"
+#include "RGBController_NX75.h"
 
-class RGBController_NX75 : public RGBController
+RGBController_NX75::RGBController_NX75(hid_device* dev)
 {
-public:
-    NX75Controller* dev;
+    controller = new NX75Controller(dev);
 
-    RGBController_NX75(hid_device* handle)
-    {
-        dev = new NX75Controller(handle);
+    name = "NX75 Keyboard";
+    vendor = "NX75";
+    type = DEVICE_TYPE_KEYBOARD;
+}
 
-        name   = "NX75 Keyboard";
-        vendor = "NX75";
-        type   = DEVICE_TYPE_KEYBOARD;
-    }
+RGBController_NX75::~RGBController_NX75()
+{
+    delete controller;
+}
 
-    ~RGBController_NX75()
-    {
-        delete dev;
-    }
+void RGBController_NX75::SetupZones()
+{
+    zone z;
+    z.name = "Keyboard";
+    z.type = ZONE_TYPE_SINGLE;
+    z.leds_count = 1;
 
-    void SetupZones() override
-    {
-        zone z;
-        z.name = "Keyboard";
-        z.type = ZONE_TYPE_SINGLE;
-        z.leds_count = 1;
+    zones.push_back(z);
+    leds.resize(1);
+}
 
-        zones.push_back(z);
-        leds.resize(1);
-    }
+void RGBController_NX75::DeviceUpdateLEDs()
+{
+    controller->Apply();
+}
 
-    void DeviceUpdateLEDs() override
-    {
-        dev->Apply();
-    }
-
-    void UpdateMode() override
-    {
-        dev->SetMode(active_mode);
-    }
-};
+void RGBController_NX75::UpdateMode()
+{
+    controller->SetMode(active_mode);
+}
