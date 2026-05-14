@@ -1,20 +1,17 @@
 #pragma once
+
+#include "RGBController.h"
 #include "NX75Controller.h"
-#include <RGBController.h>
 
 class RGBController_NX75 : public RGBController
 {
 public:
-    RGBController_NX75(NX75Controller* controller);
-    ~RGBController_NX75() override;
+    RGBController_NX75(hid_device* dev);
+    ~RGBController_NX75();
 
-    void SetupZones();
-    void SetupModes();
-    void ResizeZone(int zone, int new_size) override;
-    void UpdateZoneLEDs(int zone) override;
-    void UpdateSingleLED(int led) override;
-    void SetCustomMode() override;
-    void SetMode(size_t mode) override;
+    void SetupZones() override;
+    void DeviceUpdateLEDs() override;
+    void UpdateMode() override;
 
 private:
     NX75Controller* controller;
