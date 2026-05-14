@@ -1,34 +1,37 @@
 #pragma once
 
-#include "RGBController.h"
-#include <hidapi/hidapi.h>
+#include <cstdint>
 #include <vector>
+#include <hidapi/hidapi.h>
 
-class RGBController_NX75 : public RGBController
+class NX75Controller
 {
 public:
-    RGBController_NX75(hid_device* dev_handle);
-    ~RGBController_NX75();
+    static constexpr uint16_t VENDOR_ID  = 0x320f;
+    static constexpr uint16_t PRODUCT_ID = 0x5055;
+    static constexpr size_t REPORT_SIZE  = 64;
 
-    void SetupZones() override;
-    void ResizeZone(int /*zone*/, int /*new_size*/) override {}
+    NX75Controller(hid_device* dev);
+    ~NX75Controller();
 
-    void DeviceUpdateLEDs() override;
-    void UpdateMode() override;
+    bool SetMode(uint8_t mode);
+    bool SetBrightness(uint8_t brightness);
+    bool SetSpeed(uint8_t speed);
+    bool SetDirection(bool rtl);
+
+    bool Apply();
 
 private:
     hid_device* dev;
 
-    struct NX75State
+    struct State
     {
-        uint8_t mode       = 0x06;
+        uint8_t mode = 0x06;
         uint8_t brightness = 0x04;
-        uint8_t speed      = 0x02;
-        uint8_t direction  = 0x00;
-        uint8_t variant    = 0x00;
+        uint8_t speed = 0x02;
+        uint8_t direction = 0x00;
+        uint8_t variant = 0x00;
     } state;
-
-    static constexpr size_t REPORT_SIZE = 64;
 
 private:
     std::vector<uint8_t> BuildPacket() const;
