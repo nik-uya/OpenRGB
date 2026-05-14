@@ -1,28 +1,27 @@
-#include "NX75Controller.h"
 #include "RGBController_NX75.h"
 #include <hidapi/hidapi.h>
 #include <vector>
 
-void DetectNX75(std::vector<RGBController*>& rgb_controllers)
+#define VENDOR_ID  0x320f
+#define PRODUCT_ID 0x5055
+
+void DetectNX75(std::vector<RGBController*>& controllers)
 {
-    if(hid_init() != 0) return;
-    hid_device_info* devices = hid_enumerate(NX75Controller::VENDOR_ID, NX75Controller::PRODUCT_ID);
-    for(hid_device_info* cur = devices; cur; cur = cur->next)
+    hid_device_info* devices = hid_enumerate(VENDOR_ID, PRODUCT_ID);
+
+    hid_device_info* cur = devices;
+
+    while(cur)
     {
-        auto* controller = new NX75Controller();
-        if(controller->Connect())
+        hid_device* dev = hid_open_path(cur->path);
+
+        if(dev)
         {
-            auto* rgb = new RGBController_NX75(controller);
-            rgb->SetupZones();
-            rgb->SetupModes();
-            rgb_controllers.push_back(rgb);
+            controllers.push_back(new RGBController_NX75(dev));
         }
-        else
-        {
-            delete controller;
-        }
+
+        cur = cur->next;
     }
+
     hid_free_enumeration(devices);
 }
-
-REGISTER_DETECTOR("NX75 Keyboard", DetectNX75);
